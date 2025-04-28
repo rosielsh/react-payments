@@ -17066,8 +17066,7 @@ const CardCompletePage = () => {
   ] });
 };
 function App() {
-  const basename = PRODUCTION_BASE_URL;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(BrowserRouter, { basename, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(BrowserRouter, { basename: PRODUCTION_BASE_URL, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(GlobalStyles, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Routes, { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: ROUTER.DEFAULT, element: /* @__PURE__ */ jsxRuntimeExports.jsx(CardPage, {}) }),
