@@ -13835,9 +13835,16 @@ function requireDist() {
 }
 requireDist();
 var PopStateEventType = "popstate";
-function createBrowserHistory(options = {}) {
-  function createBrowserLocation(window2, globalHistory) {
-    let { pathname, search, hash: hash2 } = window2.location;
+function createHashHistory(options = {}) {
+  function createHashLocation(window2, globalHistory) {
+    let {
+      pathname = "/",
+      search = "",
+      hash: hash2 = ""
+    } = parsePath(window2.location.hash.substring(1));
+    if (!pathname.startsWith("/") && !pathname.startsWith(".")) {
+      pathname = "/" + pathname;
+    }
     return createLocation(
       "",
       { pathname, search, hash: hash2 },
@@ -13846,13 +13853,28 @@ function createBrowserHistory(options = {}) {
       globalHistory.state && globalHistory.state.key || "default"
     );
   }
-  function createBrowserHref(window2, to) {
-    return typeof to === "string" ? to : createPath(to);
+  function createHashHref(window2, to) {
+    let base = window2.document.querySelector("base");
+    let href2 = "";
+    if (base && base.getAttribute("href")) {
+      let url = window2.location.href;
+      let hashIndex = url.indexOf("#");
+      href2 = hashIndex === -1 ? url : url.slice(0, hashIndex);
+    }
+    return href2 + "#" + (typeof to === "string" ? to : createPath(to));
+  }
+  function validateHashLocation(location, to) {
+    warning(
+      location.pathname.charAt(0) === "/",
+      `relative pathnames are not supported in hash history.push(${JSON.stringify(
+        to
+      )})`
+    );
   }
   return getUrlBasedHistory(
-    createBrowserLocation,
-    createBrowserHref,
-    null,
+    createHashLocation,
+    createHashHref,
+    validateHashLocation,
     options
   );
 }
@@ -13951,6 +13973,7 @@ function getUrlBasedHistory(getLocation, createHref2, validateLocation, options 
   function push(to, state) {
     action = "PUSH";
     let location = createLocation(history.location, to, state);
+    if (validateLocation) validateLocation(location, to);
     index = getIndex() + 1;
     let historyState = getHistoryState(location, index);
     let url = history.createHref(location);
@@ -13969,6 +13992,7 @@ function getUrlBasedHistory(getLocation, createHref2, validateLocation, options 
   function replace2(to, state) {
     action = "REPLACE";
     let location = createLocation(history.location, to, state);
+    if (validateLocation) validateLocation(location, to);
     index = getIndex();
     let historyState = getHistoryState(location, index);
     let url = history.createHref(location);
@@ -14900,38 +14924,6 @@ function DataRoutes({
 }) {
   return useRoutesImpl(routes, void 0, state, future);
 }
-function Navigate({
-  to,
-  replace: replace2,
-  state,
-  relative
-}) {
-  invariant(
-    useInRouterContext(),
-    // TODO: This error is probably because they somehow have 2 versions of
-    // the router loaded. We can help them understand how to avoid that.
-    `<Navigate> may be used only in the context of a <Router> component.`
-  );
-  let { static: isStatic } = reactExports.useContext(NavigationContext);
-  warning(
-    !isStatic,
-    `<Navigate> must not be used on the initial render in a <StaticRouter>. This is a no-op, but you should modify your code so the <Navigate> is only ever rendered in response to some user interaction or state change.`
-  );
-  let { matches } = reactExports.useContext(RouteContext);
-  let { pathname: locationPathname } = useLocation();
-  let navigate = useNavigate();
-  let path = resolveTo(
-    to,
-    getResolveToMatches(matches),
-    locationPathname,
-    relative === "path"
-  );
-  let jsonPath = JSON.stringify(path);
-  reactExports.useEffect(() => {
-    navigate(JSON.parse(jsonPath), { replace: replace2, state, relative });
-  }, [navigate, jsonPath, relative, replace2, state]);
-  return null;
-}
 function Route(_props) {
   invariant(
     false,
@@ -15545,14 +15537,10 @@ try {
   }
 } catch (e) {
 }
-function BrowserRouter({
-  basename,
-  children,
-  window: window2
-}) {
+function HashRouter({ basename, children, window: window2 }) {
   let historyRef = reactExports.useRef();
   if (historyRef.current == null) {
-    historyRef.current = createBrowserHistory({ window: window2, v5Compat: true });
+    historyRef.current = createHashHistory({ window: window2, v5Compat: true });
   }
   let history = historyRef.current;
   let [state, setStateImpl] = reactExports.useState({
@@ -16930,7 +16918,7 @@ const useCardRouter = () => {
   const location = useLocation();
   const cardInfo = location.state || {};
   const navigateToCardComplete = (info) => {
-    navigate("/react-payments/complete", { state: info });
+    navigate("/complete", { state: info });
   };
   const navigateToHome = () => {
     navigate("/");
@@ -17093,12 +17081,11 @@ const CardCompletePage = () => {
   ] });
 };
 function App() {
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(BrowserRouter, { children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(HashRouter, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(GlobalStyles, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Routes, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/", element: /* @__PURE__ */ jsxRuntimeExports.jsx(Navigate, { to: "/react-payments/", replace: true }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/react-payments/", element: /* @__PURE__ */ jsxRuntimeExports.jsx(CardPage, {}) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/react-payments/complete", element: /* @__PURE__ */ jsxRuntimeExports.jsx(CardCompletePage, {}) })
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/", element: /* @__PURE__ */ jsxRuntimeExports.jsx(CardPage, {}) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/complete", element: /* @__PURE__ */ jsxRuntimeExports.jsx(CardCompletePage, {}) })
     ] })
   ] });
 }
