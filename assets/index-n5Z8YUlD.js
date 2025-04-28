@@ -14900,6 +14900,38 @@ function DataRoutes({
 }) {
   return useRoutesImpl(routes, void 0, state, future);
 }
+function Navigate({
+  to,
+  replace: replace2,
+  state,
+  relative
+}) {
+  invariant(
+    useInRouterContext(),
+    // TODO: This error is probably because they somehow have 2 versions of
+    // the router loaded. We can help them understand how to avoid that.
+    `<Navigate> may be used only in the context of a <Router> component.`
+  );
+  let { static: isStatic } = reactExports.useContext(NavigationContext);
+  warning(
+    !isStatic,
+    `<Navigate> must not be used on the initial render in a <StaticRouter>. This is a no-op, but you should modify your code so the <Navigate> is only ever rendered in response to some user interaction or state change.`
+  );
+  let { matches } = reactExports.useContext(RouteContext);
+  let { pathname: locationPathname } = useLocation();
+  let navigate = useNavigate();
+  let path = resolveTo(
+    to,
+    getResolveToMatches(matches),
+    locationPathname,
+    relative === "path"
+  );
+  let jsonPath = JSON.stringify(path);
+  reactExports.useEffect(() => {
+    navigate(JSON.parse(jsonPath), { replace: replace2, state, relative });
+  }, [navigate, jsonPath, relative, replace2, state]);
+  return null;
+}
 function Route(_props) {
   invariant(
     false,
@@ -16898,7 +16930,7 @@ const useCardRouter = () => {
   const location = useLocation();
   const cardInfo = location.state || {};
   const navigateToCardComplete = (info) => {
-    navigate("/card/complete", { state: info });
+    navigate("/react-payments/complete", { state: info });
   };
   const navigateToHome = () => {
     navigate("/");
@@ -17064,8 +17096,9 @@ function App() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(BrowserRouter, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(GlobalStyles, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Routes, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/", element: /* @__PURE__ */ jsxRuntimeExports.jsx(CardPage, {}) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/card/complete", element: /* @__PURE__ */ jsxRuntimeExports.jsx(CardCompletePage, {}) })
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/", element: /* @__PURE__ */ jsxRuntimeExports.jsx(Navigate, { to: "/react-payments/", replace: true }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/react-payments/", element: /* @__PURE__ */ jsxRuntimeExports.jsx(CardPage, {}) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/react-payments/complete", element: /* @__PURE__ */ jsxRuntimeExports.jsx(CardCompletePage, {}) })
     ] })
   ] });
 }
