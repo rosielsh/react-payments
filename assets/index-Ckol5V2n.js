@@ -17046,10 +17046,11 @@ const StyledTitle = newStyled.h1`
   text-align: center;
 `;
 const CardCompletePage = () => {
+  const basename = "/react-payments";
   const { cardInfo, navigateToHome } = useCardRouter();
   const { cardNumber, cardCompany } = cardInfo;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(StyledCardCompletePage, { children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StyledIcon, { src: "/check.png" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StyledIcon, { src: `${basename}/check.png` }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(StyledTitle, { children: [
       cardNumber && cardNumber[0],
       "로 시작하는 ",
