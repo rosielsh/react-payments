@@ -16893,15 +16893,20 @@ function useStep(initialStep = 0) {
     InputStep
   };
 }
+const ROUTER = {
+  DEFAULT: "/",
+  COMPLETE: "/complete"
+};
+const PRODUCTION_BASE_URL = "/react-payments";
 const useCardRouter = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const cardInfo = location.state || {};
   const navigateToCardComplete = (info) => {
-    navigate("/complete", { state: info });
+    navigate(ROUTER.COMPLETE, { state: info });
   };
   const navigateToHome = () => {
-    navigate("/");
+    navigate(ROUTER.DEFAULT);
   };
   return {
     cardInfo,
@@ -17061,12 +17066,12 @@ const CardCompletePage = () => {
   ] });
 };
 function App() {
-  const basename = "/react-payments";
+  const basename = PRODUCTION_BASE_URL;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(BrowserRouter, { basename, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(GlobalStyles, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Routes, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/", element: /* @__PURE__ */ jsxRuntimeExports.jsx(CardPage, {}) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/complete", element: /* @__PURE__ */ jsxRuntimeExports.jsx(CardCompletePage, {}) })
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: ROUTER.DEFAULT, element: /* @__PURE__ */ jsxRuntimeExports.jsx(CardPage, {}) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: ROUTER.COMPLETE, element: /* @__PURE__ */ jsxRuntimeExports.jsx(CardCompletePage, {}) })
     ] })
   ] });
 }
